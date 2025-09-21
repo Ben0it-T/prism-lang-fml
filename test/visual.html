@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prism Language FML - Visual Test</title>
+
+    <!-- Prism CSS themes -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/prism.css" rel="stylesheet" />
+    <link rel="stylesheet" id="theme-link" />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+      }
+
+      h2 {
+        color: #34495e;
+        margin-top: 30px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+      }
+
+      .controls {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .controls label {
+        display: inline-block;
+        margin-right: 20px;
+        font-weight: bold;
+      }
+
+      .controls select,
+      .controls button {
+        padding: 8px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+      }
+
+      .controls button {
+        background: #3498db;
+        color: white;
+        border: none;
+      }
+
+      .controls button:hover {
+        background: #2980b9;
+      }
+
+      .test-section {
+        background: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .test-section h3 {
+        color: #7f8c8d;
+        font-size: 1.1em;
+        margin-bottom: 15px;
+      }
+
+      .description {
+        color: #666;
+        margin-bottom: 10px;
+        font-size: 0.9em;
+      }
+
+      pre[class*='language-'] {
+        margin: 0;
+        border-radius: 4px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 20px;
+      }
+
+      .fml-input {
+        width: 100%;
+        min-height: 100px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+
+      #output {
+        padding: 20px;
+        border-radius: 4px;
+        min-height: 100px;
+      }
+
+      .status {
+        padding: 10px;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .footer {
+        text-align: center;
+        color: #7f8c8d;
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎨 Prism Language FML - Visual Test Suite</h1>
+
+      <div class="status" id="status">Loading Prism.js and language definition...</div>
+
+      <div class="controls">
+        <label for="theme-selector">Theme:</label>
+        <select id="theme-selector">
+          <option value="prism" selected>Default</option>
+          <option value="prism-tomorrow">Tomorrow</option>
+          <option value="prism-okaidia">Okaidia</option>
+          <option value="prism-twilight">Twilight</option>
+          <option value="prism-coy">Coy</option>
+          <option value="prism-solarizedlight">Solarized Light</option>
+          <option value="prism-dark">Dark</option>
+          <option value="prism-funky">Funky</option>
+        </select>
+
+        <button onclick="highlightAll()">Re-highlight All</button>
+        <button onclick="runTests()">Run Tests</button>
+      </div>
+
+      <h2>📝 Test Cases</h2>
+
+      <div class="grid">
+        <!-- Comments Test -->
+        <div class="test-section">
+          <h3>FML Comments</h3>
+          <p class="description">Testing single-line, multi-line, and metadata comments</p>
+          <pre><code class="language-fml">/// url = 'http://example.org/fhir/StructureMap/PatientTransform'
+/// name = 'PatientTransformation'
+/// status = 'active'
+
+// Single-line comment
+/* Multi-line
+   comment */
+
+src.id -> tgt.id; // Inline comment</code></pre>
+        </div>
+
+        <!-- Strings Test -->
+        <div class="test-section">
+          <h3>FML Strings & URLs</h3>
+          <p class="description">Testing string literals, URLs, and rule labels</p>
+          <pre><code class="language-fml">"copy-id" : src.id -> tgt.id = 'Patient'
+"transform-name" : src.name -> tgt.displayName = "Full Name"
+
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+
+src.text -> tgt.text = 'Line 1\nLine 2'</code></pre>
+        </div>
+
+        <!-- Numbers Test -->
+        <div class="test-section">
+          <h3>FML Numbers & Booleans</h3>
+          <p class="description">Testing numeric and boolean literals in FML</p>
+          <pre><code class="language-fml">src.value as v -> tgt.quantity = qty(5, 'mg')
+src.score -> tgt.rating = 3.14
+src.count -> tgt.total = 42
+
+src.active -> tgt.status = true
+src.deleted -> tgt.removed = false</code></pre>
+        </div>
+
+        <!-- Keywords Test -->
+        <div class="test-section">
+          <h3>FML Keywords</h3>
+          <p class="description">Testing FML structure, mode, and transformation keywords</p>
+          <pre><code class="language-fml">map "PatientTransform" = "Transform"
+
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+
+group TransformPatient(source src : Patient, target tgt : Bundle) extends BaseTransform {
+  src.name as n where n.use = 'official' -> tgt.displayName = n
+  src.identifier first as id check id.exists() -> tgt.id = id
+  src.address not_first as addr -> tgt.additionalAddress = addr
+}</code></pre>
+        </div>
+
+        <!-- Functions Test -->
+        <div class="test-section">
+          <h3>FML Functions</h3>
+          <p class="description">Testing built-in FML transformation functions</p>
+          <pre><code class="language-fml">src.text as t -> tgt.text = truncate(t, 100)
+src.code as c -> tgt.display = translate(c, 'http://example.org/ConceptMap/map1', 'display')
+
+src -> tgt.coding = cc('http://snomed.info/sct', '123456', 'Display text')
+src -> tgt.quantity = qty(5, 'mg')
+src.patientId as id -> tgt.patient = reference('Patient', id)
+
+src.date as d -> tgt.effectiveDate = dateOp(d, '+', 1, 'day')
+src -> tgt.calculated = evaluate(src, 'valueQuantity.value * 2')
+src -> tgt.identifier = uuid()</code></pre>
+        </div>
+
+        <!-- Operators Test -->
+        <div class="test-section">
+          <h3>FML Operators</h3>
+          <p class="description">Testing FML transformation and logical operators</p>
+          <pre><code class="language-fml">// Transformation arrow
+src.field -> tgt.field
+src.name as n -> tgt.displayName = n
+
+// Assignment operators
+tgt.status = 'active'
+tgt.value = src.amount
+
+// Comparison operators
+src.value as v where v > 10 and v < 100 -> tgt.range = 'normal'
+src.gender as g where g = 'male' -> tgt.genderCode = 'M'
+
+// Logical operators
+src.name as n where n.exists() and n.family != '' -> tgt.fullName = n</code></pre>
+        </div>
+      </div>
+
+      <h2>🧪 Complex Examples</h2>
+
+      <div class="test-section">
+        <h3>Complete FML Map Example</h3>
+        <p class="description">A realistic FML transformation example with multiple features</p>
+        <pre><code class="language-fml">/// url = "http://hl7.org/fhir/StructureMap/PatientToBundle"
+/// name = "PatientToBundle"
+/// title = "Patient to Bundle Transformation"
+/// status = "active"
+
+map "http://hl7.org/fhir/StructureMap/PatientToBundle" = "PatientToBundle"
+
+// Structure Definitions
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as produced
+
+imports "http://hl7.org/fhir/StructureMap/CommonFunctions"
+
+// ConceptMap for Gender Translation
+conceptmap "GenderMap" {
+  prefix s = "http://hl7.org/fhir/administrative-gender"
+  prefix t = "http://example.org/codes/gender"
+
+  s:male == t:M "Male"
+  s:female == t:F "Female"
+  s:other == t:O "Other"
+  s:unknown == t:U "Unknown"
+}
+
+// Main Transformation Group
+group PatientToBundle(source src : Patient, target tgt : Bundle) {
+  // Set bundle type
+  src -> tgt.type = 'collection'
+
+  // Set bundle identifier
+  src -> tgt.identifier = uuid() as uuid,
+         tgt.timestamp = now()
+
+  // Create patient entry
+  src -> tgt.entry as entry then {
+    src -> entry.resource = create('Patient') as patient then
+      TransformPatient(src, patient)
+    src.id as id -> entry.fullUrl = append('Patient/', id)
+  }
+
+  // Process observations if they exist
+  src.contained as contained where contained.is(Observation) ->
+    tgt.entry as obsEntry then {
+      contained -> obsEntry.resource = contained
+      contained.id as id -> obsEntry.fullUrl = append('Observation/', id)
+    }
+}
+
+// Patient Transformation Rules
+group TransformPatient(source src : Patient, target tgt : Patient) {
+  // Copy identifier
+  src.identifier -> tgt.identifier
+
+  // Transform name
+  src.name as sname -> tgt.name as tname then TransformHumanName(sname, tname)
+
+  // Transform gender with ConceptMap
+  src.gender as g -> tgt.gender = translate(g, '#GenderMap', 'code')
+
+  // Copy and validate birthDate
+  src.birthDate as bd check bd.matches('\\d{4}-\\d{2}-\\d{2}') ->
+    tgt.birthDate = bd
+
+  // Process telecom
+  src.telecom as st -> tgt.telecom as tt then {
+    st.system -> tt.system
+    st.value -> tt.value
+    st.use -> tt.use
+    st where st.rank.exists() -> tt.rank = st.rank
+  }
+
+  // Handle marital status
+  src.maritalStatus as ms -> tgt.maritalStatus = cc(
+    'http://terminology.hl7.org/CodeSystem/v3-MaritalStatus',
+    ms.coding.first().code,
+    ms.coding.first().display
+  )
+
+  // Meta information
+  src -> tgt.meta = create('Meta') as meta then {
+    src -> meta.lastUpdated = now()
+    src -> meta.profile = 'http://example.org/StructureDefinition/MyPatient'
+  }
+}
+
+// Name Transformation Group
+group TransformHumanName(source src, target tgt) {
+  src.use -> tgt.use
+  src.text -> tgt.text
+
+  // Process family name
+  src.family as sf -> tgt.family = upper(sf)
+
+  // Process given names
+  src.given first as g1 -> tgt.given = g1
+  src.given not_first as gn -> tgt.given = gn
+
+  // Handle prefix and suffix
+  src.prefix -> tgt.prefix
+  src.suffix -> tgt.suffix
+
+  // Period
+  src.period -> tgt.period
+}</code></pre>
+      </div>
+
+      <h2>🔧 FML Input</h2>
+
+      <div class="test-section">
+        <h3>Try Your Own FML Code</h3>
+        <p class="description">Enter FML code to test the syntax highlighting</p>
+        <textarea id="fml-input" class="fml-input" placeholder="Enter your FML code here...">
+/// name = 'SimpleTransform'
+/// status = 'draft'
+
+group SimpleTransform(source src : Patient, target tgt : Patient) {
+  src.id as id -> tgt.id = id "copyId"
+  src.name as n where n.use = 'official' -> tgt.displayName = n
+  src.gender as g -> tgt.genderCode = translate(g, '#GenderMap', 'code')
+}</textarea
+        >
+        <button onclick="highlightFml()">Highlight</button>
+        <div id="output"></div>
+      </div>
+
+      <div class="footer">
+        <p>Prism Language FML Plugin v0.1.0 | Visual Test Suite</p>
+        <p>Powered by <a href="https://prismjs.com">Prism.js</a></p>
+      </div>
+    </div>
+
+    <!-- Load Prism.js -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/prism.min.js"></script>
+
+    <!-- Load the fml language definition -->
+    <script src="../src/prism-lang-fml.js"></script>
+
+    <script>
+      // Status element
+      const statusEl = document.getElementById('status');
+
+      // Check if everything loaded
+      window.addEventListener('load', () => {
+        if (typeof Prism !== 'undefined' && Prism.languages.fml) {
+          statusEl.textContent = '✅ Prism.js and fml language definition loaded successfully!';
+          statusEl.classList.remove('error');
+
+          // Initial highlighting
+          Prism.highlightAll();
+        } else {
+          statusEl.textContent = '❌ Error: Failed to load Prism.js or fml language definition';
+          statusEl.classList.add('error');
+        }
+      });
+
+      // Theme switcher
+      document.getElementById('theme-selector').addEventListener('change', (e) => {
+        const theme = e.target.value;
+        const themeLink = document.getElementById('theme-link');
+        themeLink.href = `https://unpkg.com/prismjs@latest/themes/${theme}.css`;
+      });
+
+      // Re-highlight all code
+      function highlightAll() {
+        Prism.highlightAll();
+        statusEl.textContent = '✅ Code re-highlighted!';
+      }
+
+      // Highlight fml input
+      function highlightFml() {
+        const input = document.getElementById('fml-input').value;
+        const output = document.getElementById('output');
+
+        if (!input.trim()) {
+          output.innerHTML = '<em>Enter some code to highlight...</em>';
+          return;
+        }
+
+        // Create highlighted HTML
+        const highlighted = Prism.highlight(input, Prism.languages.fml, 'fml');
+        output.innerHTML = `<pre><code class="language-fml">${highlighted}</code></pre>`;
+      }
+
+      // Run automated tests
+      function runTests() {
+        console.log('Running tests...');
+
+        const tests = [
+          {
+            name: 'Metadata Comments',
+            code: '/// url = "test"',
+            expected: 'metadata-comment'
+          },
+          {
+            name: 'Comments',
+            code: '// test comment',
+            expected: 'comment'
+          },
+          {
+            name: 'Strings',
+            code: '"Patient"',
+            expected: 'string'
+          },
+          {
+            name: 'Numbers',
+            code: '42',
+            expected: 'number'
+          },
+          {
+            name: 'Structure Keywords',
+            code: 'group',
+            expected: 'structure-keyword'
+          },
+          {
+            name: 'Mode Keywords',
+            code: 'source',
+            expected: 'mode-keyword'
+          },
+          {
+            name: 'Transformation Keywords',
+            code: 'where',
+            expected: 'transformation-keyword'
+          },
+          {
+            name: 'Functions',
+            code: 'create()',
+            expected: 'function'
+          },
+          {
+            name: 'Transformation Arrow',
+            code: '->',
+            expected: 'transformation-arrow'
+          },
+          {
+            name: 'Variable Binding',
+            code: 'as',
+            expected: 'variable-binding'
+          },
+          {
+            name: 'URLs',
+            code: 'http://hl7.org/fhir/Patient',
+            expected: 'url'
+          },
+          {
+            name: 'Paths',
+            code: 'src.patient.name',
+            expected: 'path'
+          }
+        ];
+
+        let passed = 0;
+        let failed = 0;
+
+        tests.forEach((test) => {
+          const tokens = Prism.tokenize(test.code, Prism.languages.fml);
+          const hasExpectedToken = tokens.some(
+            (token) =>
+              token.type === test.expected ||
+              (typeof token === 'object' && token.type === test.expected)
+          );
+
+          if (hasExpectedToken) {
+            console.log(`✅ ${test.name}: PASSED`);
+            passed++;
+          } else {
+            console.error(`❌ ${test.name}: FAILED`);
+            failed++;
+          }
+        });
+
+        statusEl.textContent = `Tests complete: ${passed} passed, ${failed} failed`;
+        if (failed > 0) {
+          statusEl.classList.add('error');
+        } else {
+          statusEl.classList.remove('error');
+        }
+      }
+
+      // Auto-highlight fml input on load
+      window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(highlightFml, 500);
+      });
+    </script>
+  </body>
+</html>

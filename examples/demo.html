@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FHIR Mapping Language (FML) - FHIR IG Syntax Highlighting Demo</title>
+
+    <!-- Include Prism CSS -->
+    <link href="https://unpkg.com/prismjs@latest/themes/prism.css" rel="stylesheet" />
+
+    <!-- Include FML FHIR IG Styles -->
+    <link href="../src/prism-lang-fml.css" rel="stylesheet" />
+
+    <!-- Include fml styles (optional) -->
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background: #f5f5f5;
+      }
+
+      h1 {
+        color: #333;
+        border-bottom: 3px solid #007acc;
+        padding-bottom: 10px;
+      }
+
+      .demo-section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        color: #555;
+        margin-top: 0;
+      }
+
+      .description {
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      pre[class*='language-'] {
+        margin: 0;
+        border-radius: 4px;
+      }
+
+      .installation {
+        background: #e8f4fd;
+        border-left: 4px solid #007acc;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .installation code {
+        background: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>FHIR Mapping Language (FML) - FHIR IG Syntax Highlighting Demo</h1>
+
+    <div class="demo-section">
+      <h2>FHIR IG Integration</h2>
+      <p class="description">
+        This demo showcases FML syntax highlighting with colors and styles specifically designed to
+        integrate with FHIR Implementation Guide environments. The color scheme follows HL7's visual
+        identity guidelines while providing clear, distinctive highlighting for all FML language
+        constructs.
+      </p>
+      <div class="installation">
+        <p><strong>Key Features:</strong></p>
+        <ul>
+          <li>✅ FHIR IG compliant color scheme</li>
+          <li>✅ Dark theme support with <code>prefers-color-scheme</code></li>
+          <li>✅ Print-friendly high contrast styling</li>
+          <li>✅ Accessibility compliant (WCAG 2.1 AA)</li>
+          <li>✅ Bootstrap integration for FHIR IGs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Installation</h2>
+      <div class="installation">
+        <p>Include the following in your HTML:</p>
+        <code>&lt;link href="path/to/prism.css" rel="stylesheet"&gt;</code><br />
+        <code>&lt;link href="path/to/prism-lang-fml.css" rel="stylesheet"&gt;</code><br />
+        <code>&lt;script src="path/to/prism.js"&gt;&lt;/script&gt;</code><br />
+        <code>&lt;script src="path/to/prism-lang-fml.js"&gt;&lt;/script&gt;</code>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Basic FML Example</h2>
+      <p class="description">
+        This example demonstrates the basic syntax highlighting capabilities of the FML language
+        plugin for FHIR transformations.
+      </p>
+      <pre><code class="language-fml">/// url = 'http://example.org/fhir/StructureMap/PatientTransform'
+/// name = 'PatientTransformation'
+/// status = 'active'
+
+map "PatientTransform" = "Transform"
+
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+
+group TransformPatient(source src : Patient, target tgt : Bundle) {
+  // Copy patient ID
+  src.id as id -> tgt.id = id "copyId";
+
+  // Transform name with condition
+  src.name as n where n.use = 'official' -> tgt.displayName = n "copyOfficialName";
+
+  // Copy birth date
+  src.birthDate as bd -> tgt.birthDate = bd "copyBirthDate";
+}</code></pre>
+    </div>
+
+    <div class="demo-section">
+      <h2>Advanced FML Features</h2>
+      <p class="description">
+        Showcasing complex FML transformations with functions, ConceptMaps, and nested groups.
+      </p>
+      <pre><code class="language-fml">// ConceptMap for gender translation
+conceptmap "GenderMap" {
+  prefix s = "http://hl7.org/fhir/administrative-gender"
+  prefix t = "http://example.org/codes/gender"
+
+  s:male == t:M "Male"
+  s:female == t:F "Female"
+  s:other == t:O "Other"
+  s:unknown == t:U "Unknown"
+}
+
+group ComplexTransform(source src : Patient, target tgt : Bundle) {
+  // Set bundle type and metadata
+  src -> tgt.type = 'collection',
+         tgt.identifier = uuid() as uuid,
+         tgt.timestamp = now() "rule";
+
+  // Create patient entry with complex transformations
+  src -> tgt.entry as entry then {
+    src -> entry.resource = create('Patient') as patient then {
+      // Transform name with multiple conditions
+      src.name as sname where sname.use = 'official' and sname.family.exists() ->
+        patient.name as tname then {
+          sname.family as sf -> tname.family = upper(sf) "rule0";
+          sname.given first as g1 -> tname.given = g1 "rule1";
+          sname.given not_first as gn -> tname.given = gn "rule2";
+        } "rule0";
+
+      // Gender translation using ConceptMap
+      src.gender as g -> patient.gender = translate(g, '#GenderMap', 'code') "rule1";
+
+      // Date validation and transformation
+      src.birthDate as bd check bd.matches('\\d{4}-\\d{2}-\\d{2}') ->
+        patient.birthDate = bd "rule2";
+
+      // Complex identifier processing
+      src.identifier as id where id.system = 'http://example.org/mrn' then {
+        id -> patient.identifier = create('Identifier') as newId then {
+          id.value as v -> newId.value = v "setValue";
+          id -> newId.system = 'http://newexample.org/mrn' "setSystem";
+        } "createNewIdentifier";
+      } "processIdentifier";
+
+      // Extension handling
+      src.extension as ext where ext.url = 'http://example.org/ethnicity' ->
+        patient.extension as text, text.url = ext.url, text.value = ext.value "rule4";
+    } "rule3";
+
+    // Set entry URL
+    src.id as id -> entry.fullUrl = append('Patient/', id) "rule6";
+  }
+}</code></pre>
+    </div>
+
+    <div class="demo-section">
+      <h2>FML Functions & Utilities</h2>
+      <p class="description">Demonstrating FML built-in functions and utility transformations.</p>
+      <pre><code class="language-fml">group UtilityTransforms(source src : Patient, target tgt : Patient) {
+  // String manipulation functions
+  src.text as t -> tgt.text = truncate(t, 100) "truncateText";
+  src.family as f -> tgt.familyName = upper(f) "upperCaseFamily";
+  src.city as c -> tgt.cityName = initCap(c) "capitalizeCity";
+
+  // Code translation with ConceptMap
+  src.code as c -> tgt.display = translate(c, 'http://example.org/ConceptMap/map1', 'display') "rule1";
+
+  // Type creation functions
+  src -> tgt.coding = cc('http://snomed.info/sct', '123456', 'Display text') "rule2";
+  src -> tgt.quantity = qty(5, 'mg') "rule3";
+  src.value as v -> tgt.amount = qty(v, 'USD') "rule4";
+
+  // Reference creation
+  src.patientId as id -> tgt.patient = reference('Patient', id) "rule5";
+  src.practitionerId as pId -> tgt.practitioner = reference('Practitioner', pId) "rule6";
+
+  // Date operations
+  src.date as d -> tgt.effectiveDate = dateOp(d, '+', 1, 'day') "rule7";
+  src.startDate as sd -> tgt.endDate = dateOp(sd, '+', 30, 'day') "rule8";
+
+  // FHIRPath evaluation
+  src -> tgt.calculated = evaluate(src, 'valueQuantity.value * 2') "rule9";
+  src -> tgt.hasChildren = evaluate(src, 'contact.relationship.exists()') "rule10";
+
+  // UUID generation
+  src -> tgt.identifier = uuid() as uniqueId "rule11";
+
+  // Complex path expressions
+  src.contact.where(relationship.coding.where(system = 'http://example.org').exists()) as contact ->
+    tgt.emergencyContact = contact "rule12";
+
+  // List operations
+  src.identifier only_one as id -> tgt.primaryId = id "rule13";
+  src.address not_first as addr -> tgt.additionalAddress = addr "rule14";
+  src.name.given first as firstName -> tgt.firstName = firstName "rule15";
+  src.name.given last as lastName -> tgt.lastName = lastName "rule16";
+}</code></pre>
+    </div>
+
+    <!-- Load Prism.js core -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/prism.min.js"></script>
+
+    <!-- Load the fml language definition -->
+    <!-- In production, this would be your minified plugin file -->
+    <script src="../src/prism-lang-fml.js"></script>
+
+    <script>
+      // Ensure everything is highlighted on load
+      document.addEventListener('DOMContentLoaded', () => {
+        Prism.highlightAll();
+      });
+    </script>
+  </body>
+</html>

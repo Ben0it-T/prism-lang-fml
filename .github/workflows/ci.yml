@@ -1,0 +1,156 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Cache node modules
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      run: |
+        npm --version
+        if [ -f package-lock.json ]; then
+          npm ci || npm install
+        else
+          npm install
+        fi
+    
+    - name: Run linter
+      run: npm run lint
+    
+    - name: Check code formatting
+      run: npm run format:check
+    
+    - name: Run tests
+      run: npm test
+    
+    - name: Generate coverage report
+      run: npm run test:coverage
+    
+    - name: Upload coverage to Codecov
+      if: matrix.node-version == '18.x'
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+    
+    - name: Build production files
+      run: npm run build
+    
+    - name: Archive production artifacts
+      if: matrix.node-version == '18.x'
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
+
+  build-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+
+    - name: Cache node modules
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      run: |
+        npm --version
+        if [ -f package-lock.json ]; then
+          npm ci || npm install
+        else
+          npm install
+        fi
+    
+    - name: Build documentation
+      run: |
+        echo "Documentation build would go here"
+        # npm run docs:build (if you have documentation generator)
+    
+    - name: Check markdown links
+      continue-on-error: true
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        folder-path: 'docs'
+        config-file: '.github/markdown-link-check-config.json'
+
+  release:
+    needs: [test, build-docs]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Cache node modules
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      run: |
+        npm --version
+        if [ -f package-lock.json ]; then
+          npm ci || npm install
+        else
+          npm install
+        fi
+    
+    - name: Build production files
+      run: npm run build
+    
+    - name: Create release
+      if: contains(github.event.head_commit.message, '[release]')
+      run: |
+        echo "Release creation would go here"
+        # npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
