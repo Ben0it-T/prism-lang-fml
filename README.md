@@ -225,10 +225,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Issue Tracker](https://github.com/yourusername/prism-lang-fml/issues)
 - [Discussions](https://github.com/yourusername/prism-lang-fml/discussions)
 
----
-
-**Status**: ✅ **Ready for Production** - Complete FML syntax highlighting implementation
-
 ### 📊 Implementation Status
 
 - ✅ **Language Definition**: Complete FML syntax support with 15+ token types
@@ -249,3 +245,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **ConceptMaps**: Full prefix and mapping syntax support
 
 Ready for FHIR developers building healthcare interoperability solutions! 🏥
+
+---
+
+**Status**: ✅ **Ready for Production** - Complete FML syntax highlighting implementation
+
+partially developped with Claude Code
